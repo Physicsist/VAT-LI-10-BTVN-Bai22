@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vật Lí 10 - Bài 22: Biến dạng của vật rắn & Định luật Hooke</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #eff6ff 100%);
+            min-height: 100vh;
+        }
+        /* Chuẩn hiển thị ký hiệu Vecto và Công thức Toán - Vật lí */
+        .vec {
+            position: relative;
+            display: inline-block;
+            font-style: italic;
+            font-weight: 600;
+        }
+        .vec::after {
+            content: "→";
+            position: absolute;
+            top: -0.68em;
+            left: 50%;
+            transform: translateX(-50%) scale(0.75);
+            font-style: normal;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-weight: 600;
+            padding: 0 2px;
+        }
+        .math-norm {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: normal;
+            font-weight: 600;
+        }
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        .frac-num {
+            border-bottom: 1.5px solid currentColor;
+            padding: 0 4px 1px;
+            line-height: 1.1;
+        }
+        .frac-den {
+            padding: 1px 4px 0;
+            line-height: 1.1;
+        }
+        /* Hiệu ứng chuyển động lò xo và nút bấm */
+        @keyframes popIn {
+            0% { transform: scale(0.85); opacity: 0; }
+            70% { transform: scale(1.03); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes shakeWrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-pop {
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-shake {
+            animation: shakeWrong 0.4s ease-in-out;
+        }
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px -3px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12">
+
+    <!-- HEADER & THANH CÔNG CỤ -->
+    <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-30 border-b border-sky-100">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-200">
+                    <!-- Icon Lò xo SVG -->
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3h12M12 3v2l-5 2.5 10 3-10 3 10 3-5 2.5v2M8 21h8"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight">
+                        VẬT LÍ 10 • BÀI 22: ĐỊNH LUẬT HOOKE
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium">Biến dạng của vật rắn • Đặc tính của lò xo (Đảo đề & Đáp án thông minh)</p>
+                </div>
+            </div>
+
+            <!-- Cụm điều khiển Âm thanh & Học sinh -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center bg-slate-100 rounded-xl px-2.5 py-1.5 border border-slate-200">
+                    <span class="text-xs text-slate-500 mr-1.5">👤 HS:</span>
+                    <input id="studentNameInput" type="text" placeholder="Nhập họ tên..." 
+                        class="bg-transparent text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none w-28 sm:w-36"
+                        onchange="saveStudentName(this.value)">
+                </div>
+
+                <button id="soundToggleBtn" onclick="toggleSound()" 
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition">
+                    <span id="soundIcon">🔊</span>
+                    <span id="soundText">Âm thanh: BẬT</span>
+                </button>
+
+                <button onclick="testFunnySound()" title="Nghe thử hiệu ứng âm thanh vui nhộn"
+                    class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200 hover:bg-purple-200 transition">
+                    🎵 Thử loa
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto px-4 mt-5 space-y-5">
+
+        <!-- BẢNG KIỂM SOÁT MỞ KHÓA & CẤP ĐỘ -->
+        <section class="bg-white rounded-2xl shadow-sm border border-sky-100 p-4 sm:p-5">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-1">
+                        🎯 NHIỆM VỤ VỀ NHÀ BẮT BUỘC
+                    </div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800">
+                        Chinh phục <span class="text-blue-600">12/12 câu Cấp độ 1</span> đủ <span class="text-rose-600 underline">3 lần</span> để mở khóa Cấp độ 2 & 3!
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Mỗi lần làm lại, hệ thống sẽ tự động đảo vị trí câu hỏi và các phương án A, B, C, D để giúp em nhớ bản chất Vật lí.
+                    </p>
+                </div>
+
+                <!-- 3 Huy hiệu Mở khóa Cấp độ 1 -->
+                <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200 flex items-center gap-3 self-start md:self-auto">
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-slate-600">Tiến độ Cấp độ 1 (12/12)</div>
+                        <div id="masteryCountText" class="text-sm font-extrabold text-blue-600">0 / 3 lần hoàn hảo</div>
+                    </div>
+                    <div class="flex items-center gap-1.5" id="masteryBadges">
+                        <!-- Render bằng JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Nút Chọn Cấp Độ -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+                <!-- Cấp độ 1 -->
+                <button id="btnLevel1" onclick="selectLevel(1)" 
+                    class="level-card relative text-left p-3.5 rounded-2xl border-2 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-emerald-100 text-emerald-800">CẤP ĐỘ 1 • NỀN TẢNG</span>
+                            <span class="text-xs font-bold text-slate-500">12 Câu</span>
+                        </div>
+                        <h3 class="font-extrabold text-slate-800 mt-2 text-sm sm:text-base">Nhận biết & Công thức 1 bước</h3>
+                        <p class="text-xs text-slate-500 mt-1">Ghi nhớ lý thuyết biến dạng, giới hạn đàn hồi, định luật Hooke cơ bản.</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+                        <span class="text-emerald-600">🔓 Đang mở</span>
+                        <span id="lvl1BestText" class="text-slate-600">Kỉ lục: 0/12</span>
+                    </div>
+                </button>
+
+                <!-- Cấp độ 2 -->
+                <button id="btnLevel2" onclick="selectLevel(2)" 
+                    class="level-card relative text-left p-3.5 rounded-2xl border-2 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-amber-100 text-amber-800">CẤP ĐỘ 2 • MỨC 7-8 ĐIỂM</span>
+                            <span class="text-xs font-bold text-slate-500">5 Câu</span>
+                        </div>
+                        <h3 class="font-extrabold text-slate-800 mt-2 text-sm sm:text-base">Thông hiểu & Đồ thị Lò xo</h3>
+                        <p class="text-xs text-slate-500 mt-1">Bài toán treo vật thẳng đứng, đọc đồ thị chuẩn có đường gióng, lập tỉ số.</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+                        <span id="lvl2LockStatus" class="text-rose-600">🔒 Cần 3 lần 12/12 Cấp 1</span>
+                        <span id="lvl2BestText" class="text-slate-600">Kỉ lục: 0/5</span>
+                    </div>
+                </button>
+
+                <!-- Cấp độ 3 -->
+                <button id="btnLevel3" onclick="selectLevel(3)" 
+                    class="level-card relative text-left p-3.5 rounded-2xl border-2 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-rose-100 text-rose-800">CẤP ĐỘ 3 • MỨC 9-10 ĐIỂM</span>
+                            <span class="text-xs font-bold text-slate-500">5 Câu</span>
+                        </div>
+                        <h3 class="font-extrabold text-slate-800 mt-2 text-sm sm:text-base">Vận dụng cao & Thực tiễn</h3>
+                        <p class="text-xs text-slate-500 mt-1">Mặt phẳng nghiêng, cắt ghép lò xo, kết hợp lực ma sát và hai lò xo.</p>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+                        <span id="lvl3LockStatus" class="text-rose-600">🔒 Cần 3 lần 12/12 Cấp 1</span>
+                        <span id="lvl3BestText" class="text-slate-600">Kỉ lục: 0/5</span>
+                    </div>
+                </button>
+            </div>
+        </section>
+
+        <!-- THÔNG BÁO NHẮC NHỞ KHI BẤM VÀO CẤP ĐỘ BỊ KHÓA -->
+        <div id="lockWarningModal" class="hidden bg-rose-50 border-2 border-rose-300 text-rose-800 rounded-2xl p-4 shadow-sm animate-pop">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">🛑</span>
+                    <div>
+                        <h4 class="font-extrabold text-sm sm:text-base" id="lockWarningTitle">Cấp độ này đang tạm khóa!</h4>
+                        <p class="text-xs sm:text-sm mt-0.5" id="lockWarningDesc">
+                            Em cần hoàn thành <b>Cấp độ 1 đạt tuyệt đối 12/12 câu đủ 3 lần</b> để nắm thật chắc công thức nền tảng trước khi lên cấp độ nâng cao nhé!
+                        </p>
+                    </div>
+                </div>
+                <button onclick="closeLockWarning()" class="text-rose-500 hover:text-rose-800 font-bold text-sm px-2 py-1">✕</button>
+            </div>
+        </div>
+
+        <!-- KHU VỰC LÀM BÀI TƯƠNG TÁC CHÍNH -->
+        <section id="quizSection" class="bg-white rounded-2xl shadow-md border border-sky-100 overflow-hidden">
+            <!-- Thanh trạng thái câu hỏi hiện tại -->
+            <div class="bg-slate-800 text-white px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                    <span id="currentLevelBadge" class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-500 text-white">
+                        CẤP ĐỘ 1
+                    </span>
+                    <span id="questionCounter" class="text-sm sm:text-base font-bold">
+                        Câu 1 / 12
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs sm:text-sm font-semibold">
+                    <div class="flex items-center gap-1.5 text-emerald-300">
+                        <span>✔ Đúng:</span>
+                        <span id="liveCorrectCount" class="font-extrabold text-base">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-rose-300">
+                        <span>✘ Sai:</span>
+                        <span id="liveWrongCount" class="font-extrabold text-base">0</span>
+                    </div>
+                    <button onclick="restartCurrentLevel()" 
+                        class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-sky-200 text-xs font-bold transition flex items-center gap-1">
+                        🔄 Đảo đề làm lại
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thanh tiến trình (Progress Bar) -->
+            <div class="w-full bg-slate-100 h-2">
+                <div id="quizProgressBar" class="bg-gradient-to-r from-blue-500 to-emerald-500 h-2 transition-all duration-300" style="width: 8%;"></div>
+            </div>
+
+            <!-- Nội dung câu hỏi + Hình vẽ SVG + Đáp án -->
+            <div class="p-4 sm:p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Cột trái: Đề bài & Hình minh họa SVG chuẩn Vật lí (7 phần) -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span id="questionTag" class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-sky-100 text-sky-800">
+                                Lý thuyết & Nhận biết
+                            </span>
+                            <span class="text-xs text-slate-400 font-medium">• Tích chọn đáp án để xem kết quả ngay</span>
+                        </div>
+
+                        <!-- Nội dung câu hỏi -->
+                        <div id="questionText" class="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">
+                            Đang tải câu hỏi...
+                        </div>
+
+                        <!-- Khung Hình Vẽ Minh Họa SVG Chuẩn Vecto & Đường Gióng -->
+                        <div class="bg-slate-50 rounded-2xl border border-slate-200 p-3 sm:p-4 flex flex-col items-center justify-center">
+                            <div id="svgContainer" class="w-full max-w-md flex items-center justify-center overflow-hidden">
+                                <!-- SVG Động chèn tại đây -->
+                            </div>
+                            <p id="svgCaption" class="text-xs text-slate-500 font-medium mt-2 text-center italic">
+                                Hình minh họa trực quan
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Cột phải: 4 Phương án lựa chọn (Tích chọn báo Đúng/Sai ngay) & Giải thích (5 phần) -->
+                    <div class="lg:col-span-5 space-y-3">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                            Chọn 1 đáp án đúng nhất:
+                        </div>
+
+                        <!-- Danh sách 4 đáp án A, B, C, D -->
+                        <div id="optionsContainer" class="space-y-2.5">
+                            <!-- Các nút đáp án sinh bằng JS -->
+                        </div>
+
+                        <!-- Hộp Phản hồi Vui nhộn + Lời giải chi tiết (Hiện ngay sau khi click) -->
+                        <div id="instantFeedbackBox" class="hidden rounded-2xl p-4 border-2 mt-4 space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <div id="feedbackBadge" class="text-sm sm:text-base font-extrabold flex items-center gap-1.5">
+                                    <!-- Biểu cảm vui nhộn -->
+                                </div>
+                                <span id="soundWaveTag" class="text-xs px-2 py-0.5 rounded-full bg-white/80 font-bold shadow-sm">
+                                    🔊 Đã phát âm thanh
+                                </span>
+                            </div>
+                            <div id="explanationText" class="text-xs sm:text-sm text-slate-700 leading-relaxed bg-white/90 p-3 rounded-xl border border-slate-200/80">
+                                <!-- Giải thích chi tiết công thức Vật lí -->
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button id="nextQuestionBtn" onclick="nextQuestion()" 
+                                    class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-extrabold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition flex items-center justify-center gap-2">
+                                    <span>Câu tiếp theo</span>
+                                    <span>➔</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- MÀN HÌNH TỔNG KẾT SAU KHI HOÀN THÀNH 1 LƯỢT CẤP ĐỘ -->
+        <section id="summarySection" class="hidden bg-white rounded-2xl shadow-lg border-2 border-blue-200 p-6 text-center space-y-5 animate-pop">
+            <div id="summaryEmoji" class="text-5xl sm:text-6xl">🏆</div>
+            <div>
+                <span id="summaryLevelBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800">
+                    KẾT QUẢ LƯỢT LÀM BÀI
+                </span>
+                <h2 id="summaryTitle" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
+                    Hoàn thành lượt luyện tập!
+                </h2>
+                <p id="summarySubtitle" class="text-sm text-slate-600 mt-1 max-w-xl mx-auto">
+                    <!-- Lời nhận xét của giáo viên -->
+                </p>
+            </div>
+
+            <!-- Thống kê điểm số -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">Số câu đúng</div>
+                    <div id="sumScore" class="text-xl font-extrabold text-emerald-600 mt-0.5">12 / 12</div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">Tỉ lệ chính xác</div>
+                    <div id="sumPercent" class="text-xl font-extrabold text-blue-600 mt-0.5">100%</div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">Số lần đạt 12/12 Cấp 1</div>
+                    <div id="sumMastery" class="text-xl font-extrabold text-amber-600 mt-0.5">1 / 3 lần</div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div class="text-xs text-slate-500 font-semibold">Trạng thái khóa</div>
+                    <div id="sumUnlockStatus" class="text-sm font-extrabold text-rose-600 mt-1.5">Cần thêm 2 lần</div>
+                </div>
+            </div>
+
+            <!-- Các nút điều hướng tiếp theo -->
+            <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button onclick="restartCurrentLevel()" 
+                    class="px-5 py-3 rounded-xl font-extrabold text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200 transition flex items-center gap-2">
+                    <span>🔄 Làm lại cấp độ này (Đảo câu hỏi & Đáp án mới)</span>
+                </button>
+                <button id="btnGoNextLevel" onclick="goToNextUnlockedLevel()" 
+                    class="hidden px-5 py-3 rounded-xl font-extrabold text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 transition flex items-center gap-2">
+                    <span>🚀 Chuyển sang Cấp độ tiếp theo ➔</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- BẢNG TÓM TẮT CÔNG THỨC TRỌNG TÂM & LỊCH SỬ LÀM BÀI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Góc Nhớ Nhanh Công Thức Bài 22 -->
+            <section class="bg-white rounded-2xl shadow-sm border border-sky-100 p-4 sm:p-5">
+                <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2 mb-3">
+                    <span>📌</span> Sổ Tay Công Thức Bài 22 (Định luật Hooke)
+                </h3>
+                <ul class="space-y-2.5 text-xs sm:text-sm text-slate-700">
+                    <li class="flex items-start gap-2 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+                        <span class="font-bold text-blue-600">1.</span>
+                        <div>
+                            <b>Độ biến dạng của lò xo:</b> 
+                            <span class="math">Δl = |l − l<sub>0</sub>|</span> 
+                            (Kéo giãn: <span class="math">l &gt; l<sub>0</sub></span>; Nén: <span class="math">l &lt; l<sub>0</sub></span>).
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+                        <span class="font-bold text-blue-600">2.</span>
+                        <div>
+                            <b>Định luật Hooke (trong giới hạn đàn hồi):</b><br>
+                            <span class="math">F<sub>đh</sub> = k · |Δl|</span> 
+                            với <span class="math">k</span> (N/m) là độ cứng, <span class="math">|Δl|</span> đổi ra mét (m).
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+                        <span class="font-bold text-blue-600">3.</span>
+                        <div>
+                            <b>Treo vật nặng cân bằng thẳng đứng:</b><br>
+                            <span class="vec">P</span> + <span class="vec">F</span><sub>đh</sub> = <span class="vec">0</span> 
+                            ⇒ <span class="math">F<sub>đh</sub> = P = m · g ⇒ k · |Δl| = m · g</span>.
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2 bg-sky-50/70 p-2.5 rounded-xl border border-sky-100">
+                        <span class="font-bold text-blue-600">4.</span>
+                        <div>
+                            <b>Vật nằm cân bằng trên mặt phẳng nghiêng góc α:</b><br>
+                            <span class="math">F<sub>đh</sub> = P · sinα = m · g · sinα ⇒ k · |Δl| = m · g · sinα</span>.
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Lịch sử các lần làm bài của Học sinh (Giáo viên kiểm tra) -->
+            <section class="bg-white rounded-2xl shadow-sm border border-sky-100 p-4 sm:p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-2">
+                            <span>📋</span> Nhật Ký Luyện Tập (Báo cáo Giáo viên)
+                        </h3>
+                        <button onclick="resetAllProgress()" class="text-xs text-rose-500 hover:underline font-semibold">
+                            Xóa lịch sử
+                        </button>
+                    </div>
+                    <div id="historyList" class="space-y-2 max-h-44 overflow-y-auto pr-1 text-xs">
+                        <!-- Lịch sử render bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Công cụ dành riêng cho Giáo viên kiểm tra nhanh -->
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                    <span>Dành cho GV kiểm tra đề Cấp 2 & 3:</span>
+                    <button onclick="toggleTeacherUnlock()" id="teacherUnlockBtn"
+                        class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold transition">
+                        🔑 Chế độ GV: Mở khóa nhanh
+                    </button>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <!-- JAVASCRIPT: HỆ THỐNG ÂM THANH, ĐỒ HỌA SVG CHUẨN VẬT LÍ & NGÂN HÀNG CÂU HỎI -->
+    <script>
+        /*************************************************************************
+         * 1. HỆ THỐNG ÂM THANH VUI NHỘN - BẤT NGỜ (WEB AUDIO SYNTHESIZER)
+         * Đảm bảo hoạt động 100% không lỗi link, âm thanh đa dạng, sinh động.
+         *************************************************************************/
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+            document.getElementById('soundText').textContent = soundEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+            if (soundEnabled) playCorrectSound(0);
+        }
+
+        function testFunnySound() {
+            if (!soundEnabled) toggleSound();
+            const randomType = Math.floor(Math.random() * 4);
+            playCorrectSound(randomType);
+        }
+
+        // Các kiểu âm thanh ĐÚNG vui nhộn, bất ngờ
+        function playCorrectSound(variant = null) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const choice = variant !== null ? variant : Math.floor(Math.random() * 4);
+
+                if (choice === 0) {
+                    // Kiểu 1: Mario Coin + PowerUp rộn ràng
+                    const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+                    const times = [0, 0.07, 0.14, 0.21, 0.30, 0.38];
+                    const durs  = [0.06, 0.06, 0.06, 0.08, 0.07, 0.22];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + times[idx]);
+                        gain.gain.setValueAtTime(0.22, now + times[idx]);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + times[idx] + durs[idx]);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + times[idx]);
+                        osc.stop(now + times[idx] + durs[idx]);
+                    });
+                } else if (choice === 1) {
+                    // Kiểu 2: Tiếng Lò xo bật nảy chiến thắng (Boing-Ding!)
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+                    osc.frequency.setValueAtTime(1174.66, now + 0.2);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else if (choice === 2) {
+                    // Kiểu 3: Kèn Fanfare Vinh Quang
+                    const chord = [440, 554.37, 659.25, 880];
+                    chord.forEach((freq, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        const start = now + i * 0.06;
+                        const dur = i === 3 ? 0.35 : 0.08;
+                        osc.frequency.setValueAtTime(freq, start);
+                        gain.gain.setValueAtTime(0.12, start);
+                        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(start);
+                        osc.stop(start + dur);
+                    });
+                } else {
+                    // Kiểu 4: Laser Victory Chime
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(330, now);
+                    osc.frequency.linearRampToValueAtTime(1318.5, now + 0.25);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.36);
+                }
+            } catch (e) {
+                console.warn("Audio warning:", e);
+            }
+        }
+
+        // Các kiểu âm thanh SAI hài hước, khích lệ
+        function playWrongSound() {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const choice = Math.floor(Math.random() * 3);
+
+                if (choice === 0) {
+                    // Kiểu 1: Kèn Tuột Dốc Hài Hước (Wah-Wah-Waaah)
+                    const freqs = [392, 369.99, 349.23, 311.13];
+                    freqs.forEach((f, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sawtooth';
+                        const start = now + i * 0.13;
+                        const dur = i === 3 ? 0.35 : 0.11;
+                        osc.frequency.setValueAtTime(f, start);
+                        if (i === 3) osc.frequency.linearRampToValueAtTime(260, start + dur);
+                        gain.gain.setValueAtTime(0.15, start);
+                        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(start);
+                        osc.stop(start + dur);
+                    });
+                } else if (choice === 1) {
+                    // Kiểu 2: Tiếng Lò Xo Giãn Quá Giới Hạn (Boing tụt hơi)
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(480, now);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + 0.42);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.46);
+                } else {
+                    // Kiểu 3: Buzz hài hước 2 nhịp
+                    [200, 150].forEach((f, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'square';
+                        const st = now + i * 0.14;
+                        osc.frequency.setValueAtTime(f, st);
+                        gain.gain.setValueAtTime(0.14, st);
+                        gain.gain.exponentialRampToValueAtTime(0.001, st + 0.12);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(st);
+                        osc.stop(st + 0.13);
+                    });
+                }
+            } catch (e) {
+                console.warn("Audio warning:", e);
+            }
+        }
+
+        const FUNNY_PRAISES = [
+            "🎉 Đỉnh của chóp! Robert Hooke cũng phải vỗ tay!",
+            "🚀 Quá xuất sắc! Phản xạ nhanh nhạy như lò xo thép!",
+            "🌟 10 điểm không có nhưng! Nhớ công thức siêu chuẩn!",
+            "🔥 Chuẩn không cần chỉnh! Kiến thức Bài 22 nằm gọn trong lòng bàn tay!",
+            "🏆 Tuyệt vời ông mặt trời! Cứ đà này là 10 điểm Vật lí nhé!"
+        ];
+
+        const FUNNY_ENCOURAGEMENTS = [
+            "😅 Ối dồi ôi! Lò xo giãn quá giới hạn đàn hồi mất rồi, xem kĩ lời giải nhé!",
+            "弹簧 (Lò xo) hơi lệch nhịp chút xíu! Đọc lại công thức để lần sau ăn chắc câu này nha!",
+            "💡 Suýt đúng rồi! Nhớ chú ý đổi đơn vị hoặc chiều của lực đàn hồi nhé!",
+            "🧐 Bình tĩnh nào nhà Vật lí tương lai! Nhìn đường gióng trên hình vẽ để hiểu rõ hơn nhé!"
+        ];
+
+        /*************************************************************************
+         * 2. THƯ VIỆN ĐỒ HỌA SVG ĐỘNG - CHUẨN VECTƠ, ĐỒ THỊ & ĐƯỜNG GIÓNG SỐ LIỆU
+         *************************************************************************/
+        function generateSVGDiagram(type, params = {}) {
+            const defs = `
+                <defs>
+                    <marker id="arrowRed" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#e11d48"/>
+                    </marker>
+                    <marker id="arrowBlue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2563eb"/>
+                    </marker>
+                    <marker id="arrowGreen" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#059669"/>
+                    </marker>
+                    <marker id="arrowBlack" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#334155"/>
+                    </marker>
+                </defs>
+            `;
+
+            // Hàm tạo đường lò xo zíc zắc chuẩn đẹp
+            function drawVerticalSpring(x, yTop, yBottom, coils = 7, width = 24, color = "#475569") {
+                const len = yBottom - yTop;
+                const lead = 10;
+                const bodyLen = len - 2 * lead;
+                const step = bodyLen / (coils * 2);
+                let d = `M ${x} ${yTop} L ${x} ${yTop + lead} `;
+                for (let i = 0; i < coils * 2; i++) {
+                    const cy = yTop + lead + (i + 0.5) * step;
+                    const cx = x + (i % 2 === 0 ? -width / 2 : width / 2);
+                    d += `L ${cx} ${cy} `;
+                }
+                d += `L ${x} ${yBottom - lead} L ${x} ${yBottom}`;
+                return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+            }
+
+            // 1. Hình so sánh biến dạng kéo và biến dạng nén của lò xo
+            if (type === 'spring_stretch_compress') {
+                const mode = params.mode || 'stretch'; // 'stretch' or 'compress'
+                const l0Label = params.l0 || "l₀ = 20 cm";
+                const lLabel = params.l || (mode === 'stretch' ? "l = 24 cm" : "l = 17 cm");
+                const dlLabel = params.dl || (mode === 'stretch' ? "Δl = 4 cm" : "Δl = 3 cm");
+                const yBase0 = 135;
+                const yBase1 = mode === 'stretch' ? 175 : 102;
+
+                return `
+                <svg viewBox="0 0 380 225" class="w-full h-auto">
+                    ${defs}
+                    <!-- Trần treo -->
+                    <line x1="40" y1="22" x2="340" y2="22" stroke="#334155" stroke-width="3"/>
+                    <path d="M50 22 l8 -10 M75 22 l8 -10 M100 22 l8 -10 M125 22 l8 -10 M150 22 l8 -10 M175 22 l8 -10 M200 22 l8 -10 M225 22 l8 -10 M250 22 l8 -10 M275 22 l8 -10 M300 22 l8 -10 M325 22 l8 -10" stroke="#64748b" stroke-width="1.5"/>
+
+                    <!-- Lò xo 1: Tự nhiên l0 -->
+                    <text x="105" y="40" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Tự nhiên</text>
+                    ${drawVerticalSpring(105, 22, yBase0, 7, 24, "#475569")}
+                    <circle cx="105" cy="${yBase0}" r="4" fill="#334155"/>
+
+                    <!-- Đường gióng ngang l0 -->
+                    <line x1="45" y1="${yBase0}" x2="320" y2="${yBase0}" stroke="#64748b" stroke-width="1.3" stroke-dasharray="4,4"/>
+                    <!-- Kích thước l0 -->
+                    <line x1="58" y1="24" x2="58" y2="${yBase0 - 2}" stroke="#334155" stroke-width="1.2" marker-start="url(#arrowBlack)" marker-end="url(#arrowBlack)"/>
+                    <rect x="20" y="70" width="70" height="18" rx="4" fill="#f8fafc"/>
+                    <text x="55" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">${l0Label}</text>
+
+                    <!-- Lò xo 2: Biến dạng -->
+                    <text x="235" y="40" text-anchor="middle" font-size="11" font-weight="bold" fill="#2563eb">${mode === 'stretch' ? 'Biến dạng kéo' : 'Biến dạng nén'}</text>
+                    ${drawVerticalSpring(235, 22, yBase1, 7, 24, "#2563eb")}
+                    <rect x="217" y="${yBase1}" width="36" height="26" rx="5" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+                    <text x="235" y="${yBase1 + 17}" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e40af">m</text>
+
+                    <!-- Đường gióng ngang vị trí l -->
+                    <line x1="155" y1="${yBase1}" x2="335" y2="${yBase1}" stroke="#e11d48" stroke-width="1.3" stroke-dasharray="4,4"/>
+
+                    <!-- Khoảng Δl có đường gióng rõ ràng -->
+                    <line x1="175" y1="${Math.min(yBase0, yBase1) + 2}" x2="175" y2="${Math.max(yBase0, yBase1) - 2}" stroke="#e11d48" stroke-width="1.6" marker-start="url(#arrowRed)" marker-end="url(#arrowRed)"/>
+                    <text x="170" y="${(yBase0 + yBase1) / 2 + 4}" text-anchor="end" font-size="11" font-weight="bold" fill="#e11d48">${dlLabel}</text>
+
+                    <!-- Kích thước l bên phải -->
+                    <line x1="315" y1="24" x2="315" y2="${yBase1 - 2}" stroke="#2563eb" stroke-width="1.3" marker-start="url(#arrowBlue)" marker-end="url(#arrowBlue)"/>
+                    <text x="320" y="${(22 + yBase1) / 2}" text-anchor="start" font-size="11" font-weight="bold" fill="#2563eb">${lLabel}</text>
+
+                    <!-- Vecto lực đàn hồi F_đh chuẩn -->
+                    ${mode === 'stretch' 
+                        ? `<line x1="235" y1="${yBase1}" x2="235" y2="${yBase1 - 34}" stroke="#059669" stroke-width="2.4" marker-end="url(#arrowGreen)"/>
+                           <text x="252" y="${yBase1 - 20}" font-size="12" font-weight="bold" fill="#059669">F⃗<tspan dy="3" font-size="9">đh</tspan></text>
+                           <line x1="235" y1="${yBase1 + 13}" x2="235" y2="${yBase1 + 44}" stroke="#e11d48" stroke-width="2.4" marker-end="url(#arrowRed)"/>
+                           <text x="250" y="${yBase1 + 42}" font-size="12" font-weight="bold" fill="#e11d48">P⃗</text>`
+                        : `<line x1="235" y1="${yBase1}" x2="235" y2="${yBase1 + 36}" stroke="#059669" stroke-width="2.4" marker-end="url(#arrowGreen)"/>
+                           <text x="252" y="${yBase1 + 35}" font-size="12" font-weight="bold" fill="#059669">F⃗<tspan dy="3" font-size="9">đh</tspan></text>`
+                    }
+                </svg>`;
+            }
+
+            // 2. Đồ thị F_đh theo độ biến dạng Δl (Có đường gióng số liệu nét đứt chính xác)
+            if (type === 'graph_F_dl') {
+                const dl1 = params.dl1 || 4;
+                const F1 = params.F1 || 2;
+                const dl2 = params.dl2 || 8;
+                const F2 = params.F2 || 4;
+                const unitX = params.unitX || "cm";
+                const showLimit = params.showLimit || false;
+
+                return `
+                <svg viewBox="0 0 380 230" class="w-full h-auto">
+                    ${defs}
+                    <!-- Lưới tọa độ mờ -->
+                    <g stroke="#e2e8f0" stroke-width="1">
+                        <line x1="60" y1="150" x2="330" y2="150"/>
+                        <line x1="60" y1="110" x2="330" y2="110"/>
+                        <line x1="60" y1="70" x2="330" y2="70"/>
+                        <line x1="130" y1="30" x2="130" y2="190"/>
+                        <line x1="200" y1="30" x2="200" y2="190"/>
+                        <line x1="270" y1="30" x2="270" y2="190"/>
+                    </g>
+
+                    <!-- Trục tọa độ OF và OΔl -->
+                    <line x1="60" y1="190" x2="345" y2="190" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <line x1="60" y1="190" x2="60" y2="22" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <text x="48" y="204" font-size="12" font-weight="bold" fill="#1e293b">O</text>
+                    <text x="335" y="212" font-size="12" font-weight="bold" fill="#1e293b">Δl (${unitX})</text>
+                    <text x="20" y="28" font-size="12" font-weight="bold" fill="#1e293b">F<tspan dy="3" font-size="9">đh</tspan><tspan dy="-3"> (N)</tspan></text>
+
+                    <!-- Đường gióng điểm 1 (130, 140) -->
+                    <line x1="130" y1="190" x2="130" y2="140" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <line x1="60" y1="140" x2="130" y2="140" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <text x="130" y="206" text-anchor="middle" font-size="11" font-weight="bold" fill="#2563eb">${dl1}</text>
+                    <text x="50" y="144" text-anchor="end" font-size="11" font-weight="bold" fill="#2563eb">${F1}</text>
+
+                    <!-- Đường gióng điểm 2 (200, 90) -->
+                    <line x1="200" y1="190" x2="200" y2="90" stroke="#e11d48" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <line x1="60" y1="90" x2="200" y2="90" stroke="#e11d48" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <text x="200" y="206" text-anchor="middle" font-size="11" font-weight="bold" fill="#e11d48">${dl2}</text>
+                    <text x="50" y="94" text-anchor="end" font-size="11" font-weight="bold" fill="#e11d48">${F2}</text>
+
+                    <!-- Đường biểu diễn đồ thị -->
+                    ${showLimit 
+                        ? `<path d="M 60 190 L 200 90 Q 250 58 315 52" fill="none" stroke="#2563eb" stroke-width="3"/>
+                           <circle cx="200" cy="90" r="4.5" fill="#e11d48"/>
+                           <text x="205" y="80" font-size="11" font-weight="bold" fill="#e11d48">A (Giới hạn đàn hồi)</text>
+                           <text x="275" y="45" font-size="11" font-weight="bold" fill="#64748b">Vùng mất tính đàn hồi</text>`
+                        : `<line x1="60" y1="190" x2="256" y2="50" stroke="#2563eb" stroke-width="3"/>
+                           <circle cx="130" cy="140" r="4" fill="#2563eb"/>
+                           <circle cx="200" cy="90" r="4.5" fill="#e11d48"/>
+                           <text x="210" y="88" font-size="11" font-weight="bold" fill="#e11d48">M(${dl2}; ${F2})</text>`
+                    }
+                </svg>`;
+            }
+
+            // 3. Đồ thị F_đh theo chiều dài l của lò xo (cắt trục hoành tại l0)
+            if (type === 'graph_F_length') {
+                const l0 = params.l0 || 10;
+                const l1 = params.l1 || 14;
+                const F1 = params.F1 || 2;
+                return `
+                <svg viewBox="0 0 380 230" class="w-full h-auto">
+                    ${defs}
+                    <!-- Trục tọa độ -->
+                    <line x1="55" y1="190" x2="345" y2="190" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <line x1="55" y1="190" x2="55" y2="25" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <text x="43" y="205" font-size="12" font-weight="bold" fill="#1e293b">O</text>
+                    <text x="335" y="212" font-size="12" font-weight="bold" fill="#1e293b">l (cm)</text>
+                    <text x="20" y="30" font-size="12" font-weight="bold" fill="#1e293b">F<tspan dy="3" font-size="9">đh</tspan><tspan dy="-3"> (N)</tspan></text>
+
+                    <!-- Đường gióng tại điểm (l1, F1) -->
+                    <line x1="230" y1="190" x2="230" y2="95" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4,4"/>
+                    <line x1="55" y1="95" x2="230" y2="95" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+                    <!-- Đường thẳng đồ thị bắt đầu từ l0 (130, 190) -->
+                    <line x1="130" y1="190" x2="285" y2="42" stroke="#059669" stroke-width="3"/>
+                    <circle cx="130" cy="190" r="4.5" fill="#2563eb"/>
+                    <circle cx="230" cy="95" r="4.5" fill="#e11d48"/>
+
+                    <!-- Nhãn tọa độ -->
+                    <text x="130" y="208" text-anchor="middle" font-size="12" font-weight="bold" fill="#2563eb">${l0}</text>
+                    <text x="130" y="178" text-anchor="middle" font-size="10" font-weight="bold" fill="#2563eb">(l₀)</text>
+                    <text x="230" y="208" text-anchor="middle" font-size="12" font-weight="bold" fill="#e11d48">${l1}</text>
+                    <text x="45" y="99" text-anchor="end" font-size="12" font-weight="bold" fill="#e11d48">${F1}</text>
+                </svg>`;
+            }
+
+            // 4. Hai đường đồ thị so sánh độ cứng k1 và k2 trên cùng hệ trục
+            if (type === 'graph_compare_k') {
+                return `
+                <svg viewBox="0 0 380 225" class="w-full h-auto">
+                    ${defs}
+                    <line x1="60" y1="190" x2="340" y2="190" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <line x1="60" y1="190" x2="60" y2="25" stroke="#1e293b" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                    <text x="46" y="204" font-size="12" font-weight="bold" fill="#1e293b">O</text>
+                    <text x="330" y="210" font-size="12" font-weight="bold" fill="#1e293b">Δl (cm)</text>
+                    <text x="22" y="30" font-size="12" font-weight="bold" fill="#1e293b">F<tspan dy="3" font-size="9">đh</tspan><tspan dy="-3"> (N)</tspan></text>
+
+                    <!-- Đường gióng cùng 1 độ biến dạng Δl0 = 5 cm -->
+                    <line x1="200" y1="190" x2="200" y2="60" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <line x1="60" y1="60" x2="200" y2="60" stroke="#e11d48" stroke-width="1.4" stroke-dasharray="4,4"/>
+                    <line x1="60" y1="125" x2="200" y2="125" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="4,4"/>
+
+                    <!-- Đường lò xo (1) và (2) -->
+                    <line x1="60" y1="190" x2="230" y2="32" stroke="#e11d48" stroke-width="3"/>
+                    <line x1="60" y1="190" x2="290" y2="83" stroke="#2563eb" stroke-width="3"/>
+
+                    <circle cx="200" cy="60" r="4" fill="#e11d48"/>
+                    <circle cx="200" cy="125" r="4" fill="#2563eb"/>
+
+                    <text x="242" y="42" font-size="12" font-weight="bold" fill="#e11d48">Lò xo (1) - k₁</text>
+                    <text x="295" y="85" font-size="12" font-weight="bold" fill="#2563eb">Lò xo (2) - k₂</text>
+                    <text x="200" y="207" text-anchor="middle" font-size="11" font-weight="bold" fill="#334155">5</text>
+                    <text x="50" y="64" text-anchor="end" font-size="11" font-weight="bold" fill="#e11d48">6</text>
+                    <text x="50" y="129" text-anchor="end" font-size="11" font-weight="bold" fill="#2563eb">3</text>
+                </svg>`;
+            }
+
+            // 5. Mặt phẳng nghiêng góc alpha với lò xo giữ vật cân bằng (Cấp độ 3)
+            if (type === 'inclined_plane_spring') {
+                const angle = params.angle || "30°";
+                return `
+                <svg viewBox="0 0 380 220" class="w-full h-auto">
+                    ${defs}
+                    <!-- Mặt phẳng nghiêng -->
+                    <polygon points="40,185 330,185 330,50" fill="#f1f5f9" stroke="#334155" stroke-width="2"/>
+                    <!-- Góc nghiêng alpha -->
+                    <path d="M 105 185 A 65 65 0 0 0 98 158" fill="none" stroke="#2563eb" stroke-width="2"/>
+                    <text x="115" y="177" font-size="12" font-weight="bold" fill="#2563eb">α = ${angle}</text>
+
+                    <!-- Nhóm xoay theo mặt phẳng nghiêng (-25 độ) -->
+                    <g transform="translate(330, 50) rotate(155)">
+                        <!-- Chốt chặn đỉnh dốc -->
+                        <line x1="0" y1="-22" x2="0" y2="10" stroke="#1e293b" stroke-width="4"/>
+                        <!-- Lò xo dọc theo mặt nghiêng -->
+                        <path d="M 0 -8 L 18 -8 L 24 -17 L 36 1 L 48 -17 L 60 1 L 72 -17 L 84 1 L 96 -17 L 104 -8 L 120 -8" fill="none" stroke="#475569" stroke-width="2.4"/>
+                        <!-- Vật nặng m -->
+                        <rect x="120" y="-22" width="42" height="28" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+                        <!-- Vecto F_đh hướng lên đỉnh dốc -->
+                        <line x1="120" y1="-8" x2="72" y2="-8" stroke="#059669" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+                    </g>
+
+                    <!-- Vecto Trọng lực P thẳng đứng xuống từ tâm vật -->
+                    <circle cx="204" cy="98" r="3.5" fill="#1e293b"/>
+                    <line x1="204" y1="98" x2="204" y2="162" stroke="#e11d48" stroke-width="2.4" marker-end="url(#arrowRed)"/>
+                    <text x="214" y="158" font-size="12" font-weight="bold" fill="#e11d48">P⃗</text>
+                    <text x="242" y="72" font-size="12" font-weight="bold" fill="#059669">F⃗<tspan dy="3" font-size="9">đh</tspan></text>
+                    <text x="192" y="93" font-size="11" font-weight="bold" fill="#1e40af">m</text>
+                </svg>`;
+            }
+
+            // 6. Minh họa Biến dạng Đàn hồi (Dây cao su/Lò xo) vs Biến dạng Dẻo (Đất nặn)
+            if (type === 'elastic_vs_plastic') {
+                return `
+                <svg viewBox="0 0 380 195" class="w-full h-auto">
+                    ${defs}
+                    <!-- Cột 1: Vật đàn hồi -->
+                    <rect x="20" y="15" width="160" height="165" rx="12" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="100" y="38" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">BIẾN DẠNG ĐÀN HỒI</text>
+                    <path d="M 45 85 L 60 85 L 68 73 L 80 97 L 92 73 L 104 97 L 116 73 L 128 97 L 136 85 L 155 85" fill="none" stroke="#059669" stroke-width="2.8"/>
+                    <text x="100" y="125" text-anchor="middle" font-size="11" font-weight="bold" fill="#065f46">Lò xo thép, dây cao su</text>
+                    <text x="100" y="145" text-anchor="middle" font-size="10" fill="#047857">✔ Tự lấy lại hình dạng ban đầu</text>
+                    <text x="100" y="160" text-anchor="middle" font-size="10" fill="#047857">khi thôi tác dụng lực</text>
+
+                    <!-- Cột 2: Vật biến dạng dẻo -->
+                    <rect x="200" y="15" width="160" height="165" rx="12" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.5"/>
+                    <text x="280" y="38" text-anchor="middle" font-size="12" font-weight="bold" fill="#be123c">BIẾN DẠNG DẺO</text>
+                    <path d="M 235 90 Q 255 65 275 85 Q 295 100 320 78 Q 330 98 310 105 L 240 105 Z" fill="#fda4af" stroke="#e11d48" stroke-width="2"/>
+                    <text x="280" y="125" text-anchor="middle" font-size="11" font-weight="bold" fill="#9f1239">Đất sét, sáp nến, bột mì</text>
+                    <text x="280" y="145" text-anchor="middle" font-size="10" fill="#be123c">✘ Không tự phục hồi hình dạng</text>
+                    <text x="280" y="160" text-anchor="middle" font-size="10" fill="#be123c">ban đầu khi ngừng lực</text>
+                </svg>`;
+            }
+
+            // 7. Lò xo nằm ngang chịu lực kéo F (chuẩn vecto F_ngoài và F_đh ngược chiều)
+            return `
+            <svg viewBox="0 0 380 185" class="w-full h-auto">
+                ${defs}
+                <!-- Tường chắn & Mặt sàn ngang -->
+                <line x1="45" y1="30" x2="45" y2="145" stroke="#334155" stroke-width="3.5"/>
+                <line x1="45" y1="145" x2="355" y2="145" stroke="#334155" stroke-width="2"/>
+                <path d="M35 45 l10 -10 M35 70 l10 -10 M35 95 l10 -10 M35 120 l10 -10 M35 140 l10 -10" stroke="#64748b" stroke-width="1.5"/>
+
+                <!-- Vạch gióng vị trí tự nhiên l0 -->
+                <line x1="175" y1="40" x2="175" y2="155" stroke="#64748b" stroke-width="1.4" stroke-dasharray="4,4"/>
+                <text x="175" y="34" text-anchor="middle" font-size="11" font-weight="bold" fill="#475569">Vị trí tự nhiên (l₀)</text>
+
+                <!-- Lò xo nằm ngang đang giãn -->
+                <path d="M 45 105 L 70 105 L 82 88 L 102 122 L 122 88 L 142 122 L 162 88 L 182 122 L 202 88 L 222 122 L 234 105 L 255 105" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round"/>
+                <rect x="255" y="85" width="38" height="40" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+
+                <!-- Đường gióng vị trí lúc sau l -->
+                <line x1="255" y1="40" x2="255" y2="155" stroke="#e11d48" stroke-width="1.4" stroke-dasharray="4,4"/>
+
+                <!-- Mũi tên độ giãn Δl -->
+                <line x1="177" y1="62" x2="253" y2="62" stroke="#e11d48" stroke-width="1.6" marker-start="url(#arrowRed)" marker-end="url(#arrowRed)"/>
+                <text x="215" y="55" text-anchor="middle" font-size="11" font-weight="bold" fill="#e11d48">${params.dlText || 'Δl = |l - l₀|'}</text>
+
+                <!-- Hai vecto lực ngược chiều nhau tại điểm đặt -->
+                <line x1="255" y1="105" x2="195" y2="105" stroke="#059669" stroke-width="2.6" marker-end="url(#arrowGreen)"/>
+                <text x="215" y="96" font-size="12" font-weight="bold" fill="#059669">F⃗<tspan dy="3" font-size="9">đh</tspan></text>
+
+                <line x1="293" y1="105" x2="348" y2="105" stroke="#e11d48" stroke-width="2.6" marker-end="url(#arrowRed)"/>
+                <text x="322" y="96" font-size="12" font-weight="bold" fill="#e11d48">F⃗<tspan dy="3" font-size="9">kéo</tspan></text>
+            </svg>`;
+        }
+
+        /*************************************************************************
+         * 3. NGÂN HÀNG 22 CÂU HỎI BÁM SÁT BÀI 22 (12 CẤP 1 + 5 CẤP 2 + 5 CẤP 3)
+         *************************************************************************/
+        const QUESTION_BANK = {
+            // ================= CẤP ĐỘ 1: 12 CÂU NHẬN BIẾT & 1 BƯỚC TÍNH =================
+            1: [
+                {
+                    id: "L1_Q1",
+                    tag: "Nhận biết thực tế",
+                    question: "Trong các vật dụng thực tế sau đây, vật nào có <b>tính đàn hồi</b> rõ rệt nhất (xảy ra biến dạng đàn hồi khi chịu lực tác dụng vừa phải)?",
+                    svgType: "elastic_vs_plastic",
+                    svgParams: {},
+                    svgCaption: "So sánh biến dạng đàn hồi (tự khôi phục hình dạng) và biến dạng dẻo",
+                    options: [
+                        "Lò xo thép trong chiếc bút bi và dây cao su.",
+                        "Cục đất sét nặn hình đồ chơi khi bị bóp bẹp.",
+                        "Cây nến sáp bị uốn cong dưới trời nắng.",
+                        "Viên phấn viết bảng bị bẻ gãy làm đôi."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Lò xo thép và dây cao su có <b>biến dạng đàn hồi</b> vì khi thôi tác dụng lực (trong giới hạn đàn hồi), chúng tự lấy lại hình dạng và kích thước ban đầu. Đất sét và sáp nến bị biến dạng dẻo."
+                },
+                {
+                    id: "L1_Q2",
+                    tag: "Nhận biết Biến dạng kéo - nén",
+                    question: "Khi một lò xo bị <b>biến dạng kéo</b> (kéo giãn), chiều dài tự nhiên <span class='math'>l<sub>0</sub></span> và chiều dài lúc biến dạng <span class='math'>l</span> có mối liên hệ nào?",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "l₀", l: "l > l₀", dl: "Δl = l - l₀" },
+                    svgCaption: "Biến dạng kéo làm kích thước của lò xo dọc theo trục tăng lên (l > l₀)",
+                    options: [
+                        "Chiều dài lúc biến dạng lớn hơn chiều dài tự nhiên (<span class='math'>l &gt; l<sub>0</sub></span>).",
+                        "Chiều dài lúc biến dạng nhỏ hơn chiều dài tự nhiên (<span class='math'>l &lt; l<sub>0</sub></span>).",
+                        "Chiều dài của lò xo không thay đổi (<span class='math'>l = l<sub>0</sub></span>).",
+                        "Chiều dài lúc biến dạng luôn bằng không (<span class='math'>l = 0</span>)."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Khi chịu <b>biến dạng kéo</b>, lò xo giãn dài ra so với trạng thái tự nhiên nên <span class='math'>l &gt; l<sub>0</sub></span>. Ngược lại khi bị nén thì <span class='math'>l &lt; l<sub>0</sub></span>."
+                },
+                {
+                    id: "L1_Q3",
+                    tag: "Đặc điểm vectơ Lực đàn hồi",
+                    question: "Lực đàn hồi <span class='vec'>F</span><sub>đh</sub> xuất hiện ở hai đầu lò xo khi bị biến dạng có <b>hướng</b> như thế nào?",
+                    svgType: "horizontal_spring",
+                    svgParams: { dlText: "F⃗đh ngược chiều biến dạng" },
+                    svgCaption: "Vectơ lực đàn hồi F⃗đh luôn ngược hướng với ngoại lực gây biến dạng",
+                    options: [
+                        "Luôn ngược hướng với hướng của biến dạng (chống lại nguyên nhân gây biến dạng).",
+                        "Luôn cùng hướng với ngoại lực làm lò xo biến dạng.",
+                        "Luôn hướng thẳng đứng từ trên xuống dưới.",
+                        "Luôn vuông góc với trục của lò xo."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Lực đàn hồi <span class='vec'>F</span><sub>đh</sub> xuất hiện ở hai đầu lò xo, có phương trùng với trục lò xo và <b>chiều luôn ngược với chiều biến dạng</b> để đưa lò xo về kích thước tự nhiên."
+                },
+                {
+                    id: "L1_Q4",
+                    tag: "Lý thuyết Giới hạn đàn hồi",
+                    question: "Khái niệm <b>\"Giới hạn đàn hồi\"</b> của vật rắn (như lò xo) được hiểu là:",
+                    svgType: "graph_F_dl",
+                    svgParams: { dl1: 4, F1: 2, dl2: 8, F2: 4, showLimit: true },
+                    svgCaption: "Vượt quá điểm A (Giới hạn đàn hồi), lò xo không còn tuân theo định luật Hooke",
+                    options: [
+                        "Giới hạn mà trong đó vật rắn còn giữ được tính đàn hồi của nó.",
+                        "Chiều dài tự nhiên ban đầu của lò xo khi chưa treo vật.",
+                        "Khối lượng của lò xo khi đo trên cân điện tử.",
+                        "Lực ma sát lớn nhất giữa lò xo và mặt bàn."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> <b>Giới hạn đàn hồi</b> là giới hạn mà trong đó vật rắn còn giữ được tính đàn hồi. Nếu lực kéo vượt quá giới hạn này, lò xo sẽ bị hỏng (mất tính đàn hồi) và không tự trở về chiều dài <span class='math'>l<sub>0</sub></span> được nữa."
+                },
+                {
+                    id: "L1_Q5",
+                    tag: "Công thức Định luật Hooke",
+                    question: "Trong giới hạn đàn hồi, biểu thức tính độ lớn lực đàn hồi của lò xo theo <b>Định luật Hooke</b> là:",
+                    svgType: "horizontal_spring",
+                    svgParams: { dlText: "Fđh = k · |Δl|" },
+                    svgCaption: "Độ lớn lực đàn hồi tỉ lệ thuận với độ biến dạng |Δl| của lò xo",
+                    options: [
+                        "<span class='math'>F<sub>đh</sub> = k · |Δl|</span>",
+                        "<span class='math'>F<sub>đh</sub> = <span class='frac'><span class='frac-num'>k</span><span class='frac-den'>|Δl|</span></span></span>",
+                        "<span class='math'>F<sub>đh</sub> = k · (Δl)<sup>2</sup></span>",
+                        "<span class='math'>F<sub>đh</sub> = k + |Δl|</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Theo Định luật Hooke: Trong giới hạn đàn hồi, độ lớn của lực đàn hồi của lò xo tỉ lệ thuận với độ biến dạng của lò xo: <span class='math'>F<sub>đh</sub> = k · |Δl|</span>."
+                },
+                {
+                    id: "L1_Q6",
+                    tag: "Đơn vị Hệ SI",
+                    question: "Trong hệ đơn vị SI, <b>độ cứng <span class='math'>k</span></b> của lò xo có đơn vị chuẩn là gì?",
+                    svgType: "graph_F_dl",
+                    svgParams: { dl1: 2, F1: 1, dl2: 4, F2: 2 },
+                    svgCaption: "Từ Fđh = k·|Δl| ⇒ k = Fđh / |Δl| có đơn vị N/m",
+                    options: [
+                        "Niutơn trên mét (<span class='math-norm'>N/m</span>).",
+                        "Niutơn nhân mét (<span class='math-norm'>N·m</span>).",
+                        "Jun trên giây (<span class='math-norm'>J/s</span>).",
+                        "Kilôgam trên mét (<span class='math-norm'>kg/m</span>)."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Từ công thức <span class='math'>k = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>|Δl|</span></span></span>, với <span class='math'>F<sub>đh</sub></span> tính bằng <span class='math-norm'>N</span> và <span class='math'>|Δl|</span> tính bằng <span class='math-norm'>m</span>, đơn vị chuẩn của độ cứng <span class='math'>k</span> là <b><span class='math-norm'>N/m</span></b>."
+                },
+                {
+                    id: "L1_Q7",
+                    tag: "Tính 1 bước: Độ biến dạng kéo",
+                    question: "Một lò xo có chiều dài tự nhiên <span class='math'>l<sub>0</sub> = 20 cm</span>. Khi chịu lực kéo, lò xo giãn ra đến chiều dài <span class='math'>l = 24 cm</span>. Độ biến dạng <span class='math'>Δl</span> của lò xo là:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "l₀ = 20 cm", l: "l = 24 cm", dl: "Δl = ?" },
+                    svgCaption: "Hình vẽ gióng ngang chiều dài tự nhiên l₀ = 20 cm và khi giãn l = 24 cm",
+                    options: [
+                        "<span class='math-norm'>4 cm</span>",
+                        "<span class='math-norm'>44 cm</span>",
+                        "<span class='math-norm'>20 cm</span>",
+                        "<span class='math-norm'>24 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải 1 bước:</b><br>Độ biến dạng (độ giãn) của lò xo là: <span class='math'>Δl = l − l<sub>0</sub> = 24 − 20 = 4 cm</span>."
+                },
+                {
+                    id: "L1_Q8",
+                    tag: "Tính 1 bước: Độ biến dạng nén",
+                    question: "Một lò xo có chiều dài tự nhiên <span class='math'>l<sub>0</sub> = 25 cm</span>. Khi bị nén thẳng đứng, chiều dài của lò xo còn <span class='math'>l = 22 cm</span>. Độ lớn độ biến dạng <span class='math'>|Δl|</span> của lò xo bằng:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "compress", l0: "l₀ = 25 cm", l: "l = 22 cm", dl: "|Δl| = ?" },
+                    svgCaption: "Lò xo bị nén ngắn lại từ l₀ = 25 cm xuống còn l = 22 cm",
+                    options: [
+                        "<span class='math-norm'>3 cm</span>",
+                        "<span class='math-norm'>47 cm</span>",
+                        "<span class='math-norm'>22 cm</span>",
+                        "<span class='math-norm'>1,14 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải 1 bước:</b><br>Độ biến dạng nén của lò xo có độ lớn là: <span class='math'>|Δl| = |l − l<sub>0</sub>| = |22 − 25| = 3 cm</span>."
+                },
+                {
+                    id: "L1_Q9",
+                    tag: "Tính 1 bước: Lực đàn hồi",
+                    question: "Một lò xo có độ cứng <span class='math'>k = 100 N/m</span> được kéo giãn một đoạn <span class='math'>Δl = 0,05 m</span> trong giới hạn đàn hồi. Độ lớn lực đàn hồi <span class='math'>F<sub>đh</sub></span> của lò xo là:",
+                    svgType: "horizontal_spring",
+                    svgParams: { dlText: "k = 100 N/m; Δl = 0,05 m" },
+                    svgCaption: "Áp dụng trực tiếp công thức Định luật Hooke: Fđh = k · |Δl|",
+                    options: [
+                        "<span class='math-norm'>5 N</span>",
+                        "<span class='math-norm'>500 N</span>",
+                        "<span class='math-norm'>2000 N</span>",
+                        "<span class='math-norm'>0,5 N</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải 1 bước:</b><br>Áp dụng định luật Hooke: <span class='math'>F<sub>đh</sub> = k · |Δl| = 100 × 0,05 = 5 N</span>."
+                },
+                {
+                    id: "L1_Q10",
+                    tag: "Tính 1 bước (Có đổi cm → m)",
+                    question: "Một lò xo có độ cứng <span class='math'>k = 50 N/m</span> bị kéo giãn thêm <span class='math'>Δl = 4 cm</span> (biết <span class='math'>4 cm = 0,04 m</span>). Độ lớn lực đàn hồi của lò xo bằng:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "k = 50 N/m", l: "Giãn thêm", dl: "Δl = 4 cm" },
+                    svgCaption: "Lưu ý đổi đơn vị: Δl = 4 cm = 0,04 m trước khi nhân với k",
+                    options: [
+                        "<span class='math-norm'>2 N</span>",
+                        "<span class='math-norm'>200 N</span>",
+                        "<span class='math-norm'>12,5 N</span>",
+                        "<span class='math-norm'>0,2 N</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải:</b><br>Đổi <span class='math'>Δl = 4 cm = 0,04 m</span>.<br>Lực đàn hồi có độ lớn: <span class='math'>F<sub>đh</sub> = k · |Δl| = 50 × 0,04 = 2 N</span>."
+                },
+                {
+                    id: "L1_Q11",
+                    tag: "Tính 1 bước: Tìm độ cứng k",
+                    question: "Khi tác dụng lực kéo <span class='math'>F = 4 N</span> vào đầu một lò xo thì lò xo giãn ra một đoạn <span class='math'>Δl = 0,02 m</span> trong giới hạn đàn hồi. Độ cứng <span class='math'>k</span> của lò xo này là:",
+                    svgType: "graph_F_dl",
+                    svgParams: { dl1: "0,01", F1: 2, dl2: "0,02", F2: 4, unitX: "m" },
+                    svgCaption: "Đồ thị gióng tại điểm Δl = 0,02 m ứng với Fđh = 4 N",
+                    options: [
+                        "<span class='math-norm'>200 N/m</span>",
+                        "<span class='math-norm'>0,08 N/m</span>",
+                        "<span class='math-norm'>20 N/m</span>",
+                        "<span class='math-norm'>80 N/m</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải 1 bước:</b><br>Độ cứng của lò xo: <span class='math'>k = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>|Δl|</span></span> = <span class='frac'><span class='frac-num'>4</span><span class='frac-den'>0,02</span></span> = 200 N/m</span>."
+                },
+                {
+                    id: "L1_Q12",
+                    tag: "Nhận biết Đồ thị Định luật Hooke",
+                    question: "Trong giới hạn đàn hồi của lò xo, đồ thị biểu diễn sự phụ thuộc của độ lớn lực đàn hồi <span class='math'>F<sub>đh</sub></span> vào độ biến dạng <span class='math'>Δl</span> có dạng là:",
+                    svgType: "graph_F_dl",
+                    svgParams: { dl1: 4, F1: 2, dl2: 8, F2: 4, unitX: "cm" },
+                    svgCaption: "Đồ thị Fđh theo Δl trong giới hạn đàn hồi là đoạn thẳng đi qua gốc tọa độ O",
+                    options: [
+                        "Một đoạn thẳng đi qua gốc tọa độ <span class='math'>O</span>.",
+                        "Một đường cong parabol không đi qua gốc tọa độ.",
+                        "Một đường tròn tâm <span class='math'>O</span>.",
+                        "Một đường thẳng song song với trục hoành <span class='math'>OΔl</span>."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Giải thích:</b> Vì <span class='math'>F<sub>đh</sub> = k · Δl</span> (hai đại lượng tỉ lệ thuận bậc nhất với nhau và khi <span class='math'>Δl = 0</span> thì <span class='math'>F<sub>đh</sub> = 0</span>), nên đồ thị trong giới hạn đàn hồi là <b>một đoạn thẳng đi qua gốc tọa độ <span class='math'>O</span></b>."
+                }
+            ],
+
+            // ================= CẤP ĐỘ 2: 5 CÂU MỨC 7-8 ĐIỂM (THÔNG HIỂU & VẬN DỤNG) =================
+            2: [
+                {
+                    id: "L2_Q1",
+                    tag: "Treo vật thẳng đứng cân bằng",
+                    question: "Một lò xo nhẹ có chiều dài tự nhiên <span class='math'>l<sub>0</sub> = 30 cm</span>, độ cứng <span class='math'>k = 100 N/m</span> được treo thẳng đứng. Khi treo vật có khối lượng <span class='math'>m = 500 g</span> vào đầu dưới lò xo và vật đứng yên cân bằng (lấy <span class='math'>g = 10 m/s<sup>2</sup></span>), chiều dài <span class='math'>l</span> của lò xo lúc này là:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "l₀ = 30 cm", l: "l = ?", dl: "m = 500 g" },
+                    svgCaption: "Khi vật cân bằng: F⃗đh + P⃗ = 0⃗ ⇒ k·Δl = m·g",
+                    options: [
+                        "<span class='math-norm'>35 cm</span>",
+                        "<span class='math-norm'>25 cm</span>",
+                        "<span class='math-norm'>30,5 cm</span>",
+                        "<span class='math-norm'>80 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Đổi <span class='math'>m = 500 g = 0,5 kg</span>.<br>• Khi vật cân bằng: <span class='math'>F<sub>đh</sub> = P = m · g = 0,5 × 10 = 5 N</span>.<br>• Độ giãn của lò xo: <span class='math'>Δl = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>k</span></span> = <span class='frac'><span class='frac-num'>5</span><span class='frac-den'>100</span></span> = 0,05 m = 5 cm</span>.<br>• Chiều dài lò xo khi cân bằng: <span class='math'>l = l<sub>0</sub> + Δl = 30 + 5 = 35 cm</span>."
+                },
+                {
+                    id: "L2_Q2",
+                    tag: "Đọc đồ thị Fđh - l có đường gióng",
+                    question: "Cho đồ thị biểu diễn độ lớn lực đàn hồi <span class='math'>F<sub>đh</sub></span> theo chiều dài <span class='math'>l</span> của một lò xo như hình vẽ. Dựa vào các đường gióng số liệu trên đồ thị, hãy xác định chiều dài tự nhiên <span class='math'>l<sub>0</sub></span> và độ cứng <span class='math'>k</span> của lò xo:",
+                    svgType: "graph_F_length",
+                    svgParams: { l0: 10, l1: 14, F1: 2 },
+                    svgCaption: "Đồ thị cắt trục hoành tại l = 10 cm (khi Fđh = 0) và đi qua điểm (14 cm; 2 N)",
+                    options: [
+                        "<span class='math'>l<sub>0</sub> = 10 cm</span> và <span class='math'>k = 50 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 14 cm</span> và <span class='math'>k = 50 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 10 cm</span> và <span class='math'>k = 0,5 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 4 cm</span> và <span class='math'>k = 20 N/m</span>."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Khi <span class='math'>F<sub>đh</sub> = 0 N</span>, lò xo chưa biến dạng nên <span class='math'>l<sub>0</sub> = 10 cm</span>.<br>• Tại điểm có đường gióng: <span class='math'>l = 14 cm ⇒ Δl = l − l<sub>0</sub> = 14 − 10 = 4 cm = 0,04 m</span> và <span class='math'>F<sub>đh</sub> = 2 N</span>.<br>• Độ cứng: <span class='math'>k = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>Δl</span></span> = <span class='frac'><span class='frac-num'>2</span><span class='frac-den'>0,04</span></span> = 50 N/m</span>."
+                },
+                {
+                    id: "L2_Q3",
+                    tag: "Lập tỉ số hai trạng thái treo vật",
+                    question: "Một lò xo treo thẳng đứng: khi treo vật <span class='math'>m<sub>1</sub> = 200 g</span> thì lò xo giãn ra một đoạn <span class='math'>Δl<sub>1</sub> = 4 cm</span>. Hỏi nếu treo thêm vào đó một vật <span class='math'>m<sub>2</sub> = 300 g</span> nữa (tổng khối lượng là <span class='math'>500 g</span>) thì lò xo giãn tổng cộng bao nhiêu?",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "m₁ = 200g → 4cm", l: "m₁+m₂ = 500g", dl: "Δl₂ = ?" },
+                    svgCaption: "Độ giãn Δl tỉ lệ thuận với khối lượng vật treo: Δl₂ / Δl₁ = m_tổng / m₁",
+                    options: [
+                        "<span class='math-norm'>10 cm</span>",
+                        "<span class='math-norm'>6 cm</span>",
+                        "<span class='math-norm'>12 cm</span>",
+                        "<span class='math-norm'>8 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Khi cân bằng: <span class='math'>k · Δl = m · g ⇒ Δl</span> tỉ lệ thuận với khối lượng <span class='math'>m</span>.<br>• Tổng khối lượng lúc sau: <span class='math'>m = m<sub>1</sub> + m<sub>2</sub> = 200 + 300 = 500 g</span>.<br>• Lập tỉ số: <span class='math'><span class='frac'><span class='frac-num'>Δl</span><span class='frac-den'>Δl<sub>1</sub></span></span> = <span class='frac'><span class='frac-num'>m</span><span class='frac-den'>m<sub>1</sub></span></span> ⇒ Δl = 4 × <span class='frac'><span class='frac-num'>500</span><span class='frac-den'>200</span></span> = 10 cm</span>."
+                },
+                {
+                    id: "L2_Q4",
+                    tag: "So sánh 2 lò xo trên đồ thị",
+                    question: "Hình vẽ bên biểu diễn đồ thị lực đàn hồi <span class='math'>F<sub>đh</sub></span> theo độ biến dạng <span class='math'>Δl</span> của hai lò xo (1) và (2). Dựa vào đường gióng tại <span class='math'>Δl = 5 cm</span>, tỉ số độ cứng <span class='math'><span class='frac'><span class='frac-num'>k<sub>1</sub></span><span class='frac-den'>k<sub>2</sub></span></span></span> và giá trị <span class='math'>k<sub>1</sub>, k<sub>2</sub></span> là:",
+                    svgType: "graph_compare_k",
+                    svgParams: {},
+                    svgCaption: "Tại cùng Δl = 5 cm: Lò xo (1) có F₁ = 6 N; Lò xo (2) có F₂ = 3 N",
+                    options: [
+                        "<span class='math'>k<sub>1</sub> = 120 N/m; k<sub>2</sub> = 60 N/m</span> (<span class='math'>k<sub>1</sub> = 2k<sub>2</sub></span>).",
+                        "<span class='math'>k<sub>1</sub> = 60 N/m; k<sub>2</sub> = 120 N/m</span> (<span class='math'>k<sub>2</sub> = 2k<sub>1</sub></span>).",
+                        "<span class='math'>k<sub>1</sub> = 1,2 N/m; k<sub>2</sub> = 0,6 N/m</span>.",
+                        "<span class='math'>k<sub>1</sub> = 30 N/m; k<sub>2</sub> = 15 N/m</span>."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Từ đường gióng tại <span class='math'>Δl = 5 cm = 0,05 m</span>:<br>• Lò xo (1): <span class='math'>k<sub>1</sub> = <span class='frac'><span class='frac-num'>F<sub>1</sub></span><span class='frac-den'>Δl</span></span> = <span class='frac'><span class='frac-num'>6</span><span class='frac-den'>0,05</span></span> = 120 N/m</span>.<br>• Lò xo (2): <span class='math'>k<sub>2</sub> = <span class='frac'><span class='frac-num'>F<sub>2</sub></span><span class='frac-den'>Δl</span></span> = <span class='frac'><span class='frac-num'>3</span><span class='frac-den'>0,05</span></span> = 60 N/m</span>. Vậy <span class='math'>k<sub>1</sub> = 2k<sub>2</sub></span>."
+                },
+                {
+                    id: "L2_Q5",
+                    tag: "Hệ phương trình tìm l0 và k",
+                    question: "Một lò xo treo thẳng đứng: khi treo vật có trọng lượng <span class='math'>P<sub>1</sub> = 2 N</span> thì lò xo dài <span class='math'>l<sub>1</sub> = 22 cm</span>; khi treo vật có trọng lượng <span class='math'>P<sub>2</sub> = 4 N</span> thì lò xo dài <span class='math'>l<sub>2</sub> = 24 cm</span>. Chiều dài tự nhiên <span class='math'>l<sub>0</sub></span> và độ cứng <span class='math'>k</span> của lò xo là:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "P₁=2N → 22cm", l: "P₂=4N → 24cm", dl: "Tìm l₀, k?" },
+                    svgCaption: "Tăng thêm ΔP = 2 N thì lò xo giãn thêm 24 - 22 = 2 cm",
+                    options: [
+                        "<span class='math'>l<sub>0</sub> = 20 cm</span> và <span class='math'>k = 100 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 18 cm</span> và <span class='math'>k = 50 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 20 cm</span> và <span class='math'>k = 50 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 21 cm</span> và <span class='math'>k = 200 N/m</span>."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Ta có: <span class='math'>P<sub>1</sub> = k(l<sub>1</sub> − l<sub>0</sub>)</span> và <span class='math'>P<sub>2</sub> = k(l<sub>2</sub> − l<sub>0</sub>)</span>.<br>• Trừ vế theo vế: <span class='math'>P<sub>2</sub> − P<sub>1</sub> = k(l<sub>2</sub> − l<sub>1</sub>) ⇒ 4 − 2 = k(0,24 − 0,22) ⇒ k = <span class='frac'><span class='frac-num'>2</span><span class='frac-den'>0,02</span></span> = 100 N/m</span>.<br>• Thay vào: <span class='math'>2 = 100 × (0,22 − l<sub>0</sub>) ⇒ l<sub>0</sub> = 0,20 m = 20 cm</span>."
+                }
+            ],
+
+            // ================= CẤP ĐỘ 3: 5 CÂU MỨC 9-10 ĐIỂM (VẬN DỤNG CAO) =================
+            3: [
+                {
+                    id: "L3_Q1",
+                    tag: "Vận dụng cao: Mặt phẳng nghiêng",
+                    question: "Một lò xo nhẹ có độ cứng <span class='math'>k = 100 N/m</span>, chiều dài tự nhiên <span class='math'>l<sub>0</sub> = 30 cm</span>, một đầu gắn cố định ở đỉnh mặt phẳng nghiêng nhẵn góc <span class='math'>α = 30°</span> so với phương ngang. Đầu dưới gắn vật <span class='math'>m = 1 kg</span> nằm cân bằng trên mặt nghiêng (lấy <span class='math'>g = 10 m/s<sup>2</sup></span>). Chiều dài <span class='math'>l</span> của lò xo khi đó là:",
+                    svgType: "inclined_plane_spring",
+                    svgParams: { angle: "30°" },
+                    svgCaption: "Trên mặt phẳng nghiêng nhẵn: Fđh = P·sinα = m·g·sin30°",
+                    options: [
+                        "<span class='math-norm'>35 cm</span>",
+                        "<span class='math-norm'>40 cm</span>",
+                        "<span class='math-norm'>38,66 cm</span>",
+                        "<span class='math-norm'>25 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Khi vật cân bằng trên mặt phẳng nghiêng nhẵn, thành phần trọng lực kéo vật dọc theo dốc cân bằng với lực đàn hồi:<br><span class='math'>F<sub>đh</sub> = P · sinα = m · g · sin30° = 1 × 10 × 0,5 = 5 N</span>.<br>• Độ giãn của lò xo: <span class='math'>Δl = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>k</span></span> = <span class='frac'><span class='frac-num'>5</span><span class='frac-den'>100</span></span> = 0,05 m = 5 cm</span>.<br>• Chiều dài của lò xo: <span class='math'>l = l<sub>0</sub> + Δl = 30 + 5 = 35 cm</span>."
+                },
+                {
+                    id: "L3_Q2",
+                    tag: "Vận dụng cao: Lực đàn hồi & Ma sát trượt",
+                    question: "Dùng một lò xo có độ cứng <span class='math'>k = 80 N/m</span> kéo một vật có khối lượng <span class='math'>m = 2 kg</span> chuyển động <b>thẳng đều</b> trên mặt sàn nằm ngang. Biết hệ số ma sát trượt giữa vật và sàn là <span class='math'>μ = 0,2</span> và <span class='math'>g = 10 m/s<sup>2</sup></span>. Độ giãn <span class='math'>Δl</span> của lò xo khi đó là:",
+                    svgType: "horizontal_spring",
+                    svgParams: { dlText: "Chuyển động đều: Fđh = F_ms = μmg" },
+                    svgCaption: "Khi kéo vật chuyển động thẳng đều theo phương ngang: Fđh = F_mst = μ·m·g",
+                    options: [
+                        "<span class='math-norm'>5 cm</span>",
+                        "<span class='math-norm'>2,5 cm</span>",
+                        "<span class='math-norm'>4 cm</span>",
+                        "<span class='math-norm'>25 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Vật chuyển động thẳng đều trên sàn ngang nên lực đàn hồi của lò xo cân bằng với lực ma sát trượt:<br><span class='math'>F<sub>đh</sub> = F<sub>mst</sub> = μ · N = μ · m · g = 0,2 × 2 × 10 = 4 N</span>.<br>• Ta có: <span class='math'>k · Δl = 4 ⇒ Δl = <span class='frac'><span class='frac-num'>4</span><span class='frac-den'>80</span></span> = 0,05 m = 5 cm</span>."
+                },
+                {
+                    id: "L3_Q3",
+                    tag: "Vận dụng cao: Kéo giãn vs Nén lò xo",
+                    question: "Một lò xo nhẹ đặt thẳng đứng có đầu dưới gắn cố định. Khi đặt vật <span class='math'>m<sub>1</sub> = 400 g</span> lên đầu trên thì lò xo bị <b>nén</b> và có chiều dài <span class='math'>l<sub>1</sub> = 23 cm</span>. Nếu treo lò xo đó thẳng đứng và móc vật <span class='math'>m<sub>2</sub> = 600 g</span> vào đầu dưới thì lò xo bị <b>giãn</b> và có chiều dài <span class='math'>l<sub>2</sub> = 28 cm</span> (<span class='math'>g = 10 m/s<sup>2</sup></span>). Chiều dài tự nhiên <span class='math'>l<sub>0</sub></span> và độ cứng <span class='math'>k</span> là:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "compress", l0: "Nén m₁ → 23cm", l: "Giãn m₂ → 28cm", dl: "Tìm l₀, k" },
+                    svgCaption: "Chú ý: Khi nén thì l₁ = l₀ - Δl₁; khi kéo giãn thì l₂ = l₀ + Δl₂",
+                    options: [
+                        "<span class='math'>l<sub>0</sub> = 25 cm</span> và <span class='math'>k = 200 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 25,5 cm</span> và <span class='math'>k = 100 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 26 cm</span> và <span class='math'>k = 200 N/m</span>.",
+                        "<span class='math'>l<sub>0</sub> = 24 cm</span> và <span class='math'>k = 150 N/m</span>."
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Khi nén bởi <span class='math'>P<sub>1</sub> = 0,4 × 10 = 4 N</span>: <span class='math'>k(l<sub>0</sub> − 0,23) = 4</span> (1).<br>• Khi giãn bởi <span class='math'>P<sub>2</sub> = 0,6 × 10 = 6 N</span>: <span class='math'>k(0,28 − l<sub>0</sub>) = 6</span> (2).<br>• Cộng (1) và (2): <span class='math'>k(0,28 − 0,23) = 10 ⇒ 0,05k = 10 ⇒ k = 200 N/m</span>.<br>• Thay <span class='math'>k = 200 N/m</span> vào (1): <span class='math'>200(l<sub>0</sub> − 0,23) = 4 ⇒ l<sub>0</sub> = 0,25 m = 25 cm</span>."
+                },
+                {
+                    id: "L3_Q4",
+                    tag: "Vận dụng cao: Ghép nối tiếp & song song 2 lò xo",
+                    question: "Cho hai lò xo nhẹ có độ cứng lần lượt là <span class='math'>k<sub>1</sub> = 60 N/m</span> và <span class='math'>k<sub>2</sub> = 40 N/m</span> được mắc <b>song song</b> với nhau để cùng giữ một vật nặng khối lượng <span class='math'>m = 1,5 kg</span> treo thẳng đứng cân bằng (<span class='math'>g = 10 m/s<sup>2</sup></span>), biết hai lò xo có cùng chiều dài tự nhiên. Độ giãn của hệ lò xo khi cân bằng là:",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "k₁ // k₂", l: "k_td = k₁ + k₂", dl: "m = 1,5 kg" },
+                    svgCaption: "Hai lò xo ghép song song cùng độ giãn Δl: F_đh1 + F_đh2 = P ⇒ (k₁ + k₂)·Δl = m·g",
+                    options: [
+                        "<span class='math-norm'>15 cm</span>",
+                        "<span class='math-norm'>62,5 cm</span>",
+                        "<span class='math-norm'>10 cm</span>",
+                        "<span class='math-norm'>25 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Khi hai lò xo ghép song song có cùng độ giãn <span class='math'>Δl</span>, tổng lực đàn hồi cân bằng với trọng lực:<br><span class='math'>F<sub>đh1</sub> + F<sub>đh2</sub> = P ⇒ (k<sub>1</sub> + k<sub>2</sub>) · Δl = m · g</span>.<br>• Thay số: <span class='math'>(60 + 40) · Δl = 1,5 × 10 = 15 N</span>.<br>• Suy ra: <span class='math'>Δl = <span class='frac'><span class='frac-num'>15</span><span class='frac-den'>100</span></span> = 0,15 m = 15 cm</span>."
+                },
+                {
+                    id: "L3_Q5",
+                    tag: "Vận dụng cao: Lực đàn hồi trong thang máy gia tốc",
+                    question: "Một lò xo nhẹ có độ cứng <span class='math'>k = 100 N/m</span> treo trên trần một thang máy, đầu dưới treo vật <span class='math'>m = 500 g</span>. Khi thang máy đi lên nhanh dần đều với gia tốc <span class='math'>a = 2 m/s<sup>2</sup></span> (lấy <span class='math'>g = 10 m/s<sup>2</sup></span>), lò xo giãn một đoạn <span class='math'>Δl</span> không đổi bằng bao nhiêu?",
+                    svgType: "spring_stretch_compress",
+                    svgParams: { mode: "stretch", l0: "a↑ = 2 m/s²", l: "Fđh - P = m·a", dl: "Δl = ?" },
+                    svgCaption: "Theo Định luật II Newton chiếu lên chiều chuyển động đi lên: Fđh - P = m·a",
+                    options: [
+                        "<span class='math-norm'>6 cm</span>",
+                        "<span class='math-norm'>5 cm</span>",
+                        "<span class='math-norm'>4 cm</span>",
+                        "<span class='math-norm'>12 cm</span>"
+                    ],
+                    correctIndex: 0,
+                    explanation: "<b>Lời giải chi tiết:</b><br>• Đổi <span class='math'>m = 500 g = 0,5 kg</span>.<br>• Theo định luật II Newton (chọn chiều dương hướng lên cùng chiều gia tốc <span class='vec'>a</span>):<br><span class='math'>F<sub>đh</sub> − P = m · a ⇒ F<sub>đh</sub> = m(g + a) = 0,5 × (10 + 2) = 6 N</span>.<br>• Độ giãn của lò xo: <span class='math'>Δl = <span class='frac'><span class='frac-num'>F<sub>đh</sub></span><span class='frac-den'>k</span></span> = <span class='frac'><span class='frac-num'>6</span><span class='frac-den'>100</span></span> = 0,06 m = 6 cm</span>."
+                }
+            ]
+        };
+
+        /*************************************************************************
+         * 4. QUẢN LÝ TRẠNG THÁI, ĐẢO CÂU HỎI & ĐÁP ÁN, KIỂM SOÁT MỞ KHÓA 3 LẦN
+         *************************************************************************/
+        const STORAGE_KEY = "VL10_BAI22_HOOKE_STATE_V1";
+
+        let appState = {
+            studentName: "",
+            level1PerfectRuns: 0, // Phải đạt >= 3 mới mở khóa Cấp độ 2 & 3
+            teacherUnlocked: false,
+            bestScores: { 1: 0, 2: 0, 3: 0 },
+            history: []
+        };
+
+        let currentLevel = 1;
+        let activeQuestions = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let hasAnsweredCurrent = false;
+
+        // Thuật toán trộn ngẫu nhiên Fisher-Yates (Đảo vị trí câu hỏi và đáp án chuẩn xác)
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    appState = { ...appState, ...parsed };
+                }
+            } catch (e) {
+                console.warn("LocalStorage warning:", e);
+            }
+            document.getElementById('studentNameInput').value = appState.studentName || "";
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.warn("LocalStorage save warning:", e);
+            }
+        }
+
+        function saveStudentName(val) {
+            appState.studentName = val.trim();
+            saveState();
+        }
+
+        function isHigherLevelsUnlocked() {
+            return appState.level1PerfectRuns >= 3 || appState.teacherUnlocked;
+        }
+
+        // Cập nhật giao diện Huy hiệu 3 lần đạt 12/12 và Trạng thái các cấp độ
+        function updateDashboardUI() {
+            const runs = Math.min(appState.level1PerfectRuns, 3);
+            document.getElementById('masteryCountText').textContent = `${appState.level1PerfectRuns} / 3 lần đạt 12/12`;
+
+            let badgesHTML = "";
+            for (let i = 1; i <= 3; i++) {
+                if (i <= runs || appState.teacherUnlocked) {
+                    badgesHTML += `<div class="w-9 h-9 rounded-xl bg-amber-400 text-white flex items-center justify-center text-lg shadow-sm font-bold animate-pop" title="Đã hoàn thành lần ${i}">⭐</div>`;
+                } else {
+                    badgesHTML += `<div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center text-sm font-bold" title="Chưa đạt lần ${i}">${i}</div>`;
+                }
+            }
+            document.getElementById('masteryBadges').innerHTML = badgesHTML;
+
+            // Điểm cao nhất từng cấp
+            document.getElementById('lvl1BestText').textContent = `Kỉ lục: ${appState.bestScores[1] || 0}/12`;
+            document.getElementById('lvl2BestText').textContent = `Kỉ lục: ${appState.bestScores[2] || 0}/5`;
+            document.getElementById('lvl3BestText').textContent = `Kỉ lục: ${appState.bestScores[3] || 0}/5`;
+
+            const unlocked = isHigherLevelsUnlocked();
+            const remain = Math.max(0, 3 - appState.level1PerfectRuns);
+
+            const lvl2Status = document.getElementById('lvl2LockStatus');
+            const lvl3Status = document.getElementById('lvl3LockStatus');
+            if (unlocked) {
+                lvl2Status.innerHTML = `<span class="text-emerald-600">🔓 Đã mở khóa</span>`;
+                lvl3Status.innerHTML = `<span class="text-emerald-600">🔓 Đã mở khóa</span>`;
+            } else {
+                lvl2Status.innerHTML = `<span class="text-rose-600">🔒 Còn thiếu ${remain} lần 12/12 Cấp 1</span>`;
+                lvl3Status.innerHTML = `<span class="text-rose-600">🔒 Còn thiếu ${remain} lần 12/12 Cấp 1</span>`;
+            }
+
+            // Viền nút cấp độ đang chọn
+            [1, 2, 3].forEach(lvl => {
+                const btn = document.getElementById(`btnLevel${lvl}`);
+                if (lvl === currentLevel) {
+                    btn.className = "level-card relative text-left p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50/40 shadow-md transition flex flex-col justify-between";
+                } else if (lvl > 1 && !unlocked) {
+                    btn.className = "level-card relative text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50/70 opacity-80 hover:border-rose-300 transition flex flex-col justify-between";
+                } else {
+                    btn.className = "level-card relative text-left p-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:border-blue-300 transition flex flex-col justify-between";
+                }
+            });
+
+            // Nút giáo viên
+            const tBtn = document.getElementById('teacherUnlockBtn');
+            if (appState.teacherUnlocked) {
+                tBtn.textContent = "🔑 Chế độ GV: ĐANG MỞ KHÓA (Bấm để khóa lại)";
+                tBtn.className = "px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-bold transition";
+            } else {
+                tBtn.textContent = "🔑 Chế độ GV: Mở khóa nhanh";
+                tBtn.className = "px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold transition";
+            }
+
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            if (!appState.history || appState.history.length === 0) {
+                container.innerHTML = `<div class="text-slate-400 italic py-4 text-center">Chưa có lượt hoàn thành nào. Hãy bắt đầu làm Cấp độ 1 nhé!</div>`;
+                return;
+            }
+            container.innerHTML = appState.history.slice(0, 12).map((item, idx) => `
+                <div class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="font-bold text-slate-700">#${appState.history.length - idx} • Cấp độ ${item.level}</span>
+                        <span class="text-slate-400 ml-1">(${item.time})</span>
+                    </div>
+                    <div class="font-extrabold ${item.perfect ? 'text-emerald-600' : 'text-amber-600'}">
+                        ${item.score}/${item.total} câu ${item.perfect ? '⭐' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectLevel(lvl) {
+            if (lvl > 1 && !isHigherLevelsUnlocked()) {
+                const remain = Math.max(0, 3 - appState.level1PerfectRuns);
+                document.getElementById('lockWarningTitle').textContent = `Cấp độ ${lvl} đang bị khóa!`;
+                document.getElementById('lockWarningDesc').innerHTML = 
+                    `Theo yêu cầu của giáo viên, em phải hoàn thành <b>hết 12 câu Cấp độ 1 đạt 12/12 đủ 3 lần</b> để thuộc lòng công thức cơ bản trước. Hiện tại em đã đạt <b>${appState.level1PerfectRuns}/3 lần</b> (cần thêm <b>${remain} lần</b> đạt 12/12 nữa).`;
+                document.getElementById('lockWarningModal').classList.remove('hidden');
+                playWrongSound();
+                return;
+            }
+            closeLockWarning();
+            currentLevel = lvl;
+            startLevelQuiz(lvl);
+        }
+
+        function closeLockWarning() {
+            document.getElementById('lockWarningModal').classList.add('hidden');
+        }
+
+        function toggleTeacherUnlock() {
+            appState.teacherUnlocked = !appState.teacherUnlocked;
+            saveState();
+            updateDashboardUI();
+            if (appState.teacherUnlocked) {
+                closeLockWarning();
+                playCorrectSound(2);
+            }
+        }
+
+        function resetAllProgress() {
+            appState.level1PerfectRuns = 0;
+            appState.teacherUnlocked = false;
+            appState.bestScores = { 1: 0, 2: 0, 3: 0 };
+            appState.history = [];
+            saveState();
+            currentLevel = 1;
+            startLevelQuiz(1);
+        }
+
+        // Bắt đầu hoặc làm lại cấp độ hiện tại (Đảo vị trí câu hỏi + Đảo vị trí đáp án A, B, C, D)
+        function startLevelQuiz(lvl) {
+            const rawQuestions = QUESTION_BANK[lvl];
+            // Đảo thứ tự câu hỏi và đảo cả 4 đáp án bên trong mỗi câu
+            activeQuestions = shuffleArray(rawQuestions).map(q => {
+                const optionObjects = q.options.map((text, idx) => ({
+                    text,
+                    isCorrect: idx === q.correctIndex
+                }));
+                const shuffledOptions = shuffleArray(optionObjects);
+                return {
+                    ...q,
+                    shuffledOptions
+                };
+            });
+
+            currentIndex = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            hasAnsweredCurrent = false;
+
+            document.getElementById('summarySection').classList.add('hidden');
+            document.getElementById('quizSection').classList.remove('hidden');
+
+            const badge = document.getElementById('currentLevelBadge');
+            if (lvl === 1) {
+                badge.textContent = "CẤP ĐỘ 1 • NỀN TẢNG";
+                badge.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-emerald-500 text-white";
+            } else if (lvl === 2) {
+                badge.textContent = "CẤP ĐỘ 2 • 7-8 ĐIỂM";
+                badge.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-amber-500 text-white";
+            } else {
+                badge.textContent = "CẤP ĐỘ 3 • 9-10 ĐIỂM";
+                badge.className = "px-2.5 py-1 rounded-lg text-xs font-extrabold bg-rose-500 text-white";
+            }
+
+            updateDashboardUI();
+            renderCurrentQuestion();
+        }
+
+        function restartCurrentLevel() {
+            startLevelQuiz(currentLevel);
+        }
+
+        // Hiển thị câu hỏi hiện tại
+        function renderCurrentQuestion() {
+            hasAnsweredCurrent = false;
+            const q = activeQuestions[currentIndex];
+            const total = activeQuestions.length;
+
+            document.getElementById('questionCounter').textContent = `Câu ${currentIndex + 1} / ${total}`;
+            document.getElementById('liveCorrectCount').textContent = correctCount;
+            document.getElementById('liveWrongCount').textContent = wrongCount;
+
+            const progressPercent = Math.round(((currentIndex) / total) * 100);
+            document.getElementById('quizProgressBar').style.width = `${Math.max(6, progressPercent)}%`;
+
+            document.getElementById('questionTag').textContent = q.tag;
+            document.getElementById('questionText').innerHTML = `<span class="text-blue-600 mr-1">Câu ${currentIndex + 1}:</span> ${q.question}`;
+
+            // Vẽ hình SVG tương ứng
+            document.getElementById('svgContainer').innerHTML = generateSVGDiagram(q.svgType, q.svgParams);
+            document.getElementById('svgCaption').textContent = q.svgCaption;
+
+            // Render 4 phương án A, B, C, D đã đảo
+            const labels = ['A', 'B', 'C', 'D'];
+            const optionsHTML = q.shuffledOptions.map((opt, idx) => `
+                <button id="optBtn_${idx}" onclick="selectOption(${idx})"
+                    class="option-btn w-full text-left p-3.5 rounded-xl border-2 border-slate-200 bg-white hover:border-blue-400 flex items-start gap-3 group">
+                    <span id="optLabel_${idx}" class="w-7 h-7 rounded-lg bg-slate-100 group-hover:bg-blue-600 group-hover:text-white text-slate-700 font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0 transition">
+                        ${labels[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base font-medium text-slate-800 leading-snug pt-0.5">
+                        ${opt.text}
+                    </span>
+                </button>
+            `).join('');
+
+            document.getElementById('optionsContainer').innerHTML = optionsHTML;
+            document.getElementById('instantFeedbackBox').classList.add('hidden');
+        }
+
+        // Xử lý ngay lập tức khi học sinh tích chọn đáp án (KHÔNG CẦN NÚT KIỂM TRA)
+        function selectOption(selectedIdx) {
+            if (hasAnsweredCurrent) return;
+            hasAnsweredCurrent = true;
+
+            const q = activeQuestions[currentIndex];
+            const chosen = q.shuffledOptions[selectedIdx];
+            const isCorrect = chosen.isCorrect;
+
+            if (isCorrect) {
+                correctCount++;
+                playCorrectSound();
+            } else {
+                wrongCount++;
+                playWrongSound();
+            }
+
+            document.getElementById('liveCorrectCount').textContent = correctCount;
+            document.getElementById('liveWrongCount').textContent = wrongCount;
+
+            // Tô màu các phương án ngay lập tức
+            q.shuffledOptions.forEach((opt, idx) => {
+                const btn = document.getElementById(`optBtn_${idx}`);
+                const lbl = document.getElementById(`optLabel_${idx}`);
+                btn.disabled = true;
+
+                if (opt.isCorrect) {
+                    btn.className = "w-full text-left p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 flex items-start gap-3 shadow-sm";
+                    lbl.className = "w-7 h-7 rounded-lg bg-emerald-600 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0";
+                    lbl.textContent = "✔";
+                } else if (idx === selectedIdx && !opt.isCorrect) {
+                    btn.className = "w-full text-left p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50 flex items-start gap-3 animate-shake";
+                    lbl.className = "w-7 h-7 rounded-lg bg-rose-600 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center shrink-0";
+                    lbl.textContent = "✘";
+                } else {
+                    btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50 opacity-55 flex items-start gap-3";
+                }
+            });
+
+            // Hiển thị hộp giải thích & phản hồi vui nhộn ngay lập tức
+            const fbBox = document.getElementById('instantFeedbackBox');
+            const fbBadge = document.getElementById('feedbackBadge');
+            const expText = document.getElementById('explanationText');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+
+            fbBox.classList.remove('hidden');
+            if (isCorrect) {
+                fbBox.className = "rounded-2xl p-4 border-2 border-emerald-400 bg-emerald-50/90 mt-4 space-y-2 animate-pop";
+                const praise = FUNNY_PRAISES[Math.floor(Math.random() * FUNNY_PRAISES.length)];
+                fbBadge.className = "text-sm sm:text-base font-extrabold text-emerald-800";
+                fbBadge.innerHTML = praise;
+            } else {
+                fbBox.className = "rounded-2xl p-4 border-2 border-rose-400 bg-rose-50/90 mt-4 space-y-2 animate-pop";
+                const encourage = FUNNY_ENCOURAGEMENTS[Math.floor(Math.random() * FUNNY_ENCOURAGEMENTS.length)];
+                fbBadge.className = "text-sm sm:text-base font-extrabold text-rose-800";
+                fbBadge.innerHTML = encourage;
+            }
+
+            expText.innerHTML = q.explanation;
+
+            if (currentIndex === activeQuestions.length - 1) {
+                nextBtn.innerHTML = `<span>Xem tổng kết lượt làm bài</span> <span>🏆</span>`;
+            } else {
+                nextBtn.innerHTML = `<span>Câu tiếp theo (${currentIndex + 2}/${activeQuestions.length})</span> <span>➔</span>`;
+            }
+
+            // Cập nhật thanh tiến trình
+            const progressPercent = Math.round(((currentIndex + 1) / activeQuestions.length) * 100);
+            document.getElementById('quizProgressBar').style.width = `${progressPercent}%`;
+        }
+
+        function nextQuestion() {
+            if (currentIndex < activeQuestions.length - 1) {
+                currentIndex++;
+                renderCurrentQuestion();
+            } else {
+                finishLevelRun();
+            }
+        }
+
+        // Hoàn thành 1 lượt cấp độ -> Kiểm tra điều kiện 12/12 câu Cấp độ 1 đủ 3 lần
+        function finishLevelRun() {
+            const total = activeQuestions.length;
+            const isPerfect = (correctCount === total);
+
+            // Lưu kỷ lục
+            if (correctCount > (appState.bestScores[currentLevel] || 0)) {
+                appState.bestScores[currentLevel] = correctCount;
+            }
+
+            // Nếu đang ở Cấp độ 1 và đúng tuyệt đối 12/12
+            if (currentLevel === 1 && isPerfect) {
+                appState.level1PerfectRuns++;
+                playCorrectSound(2);
+            } else if (isPerfect) {
+                playCorrectSound(2);
+            }
+
+            // Ghi vào lịch sử làm bài
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            appState.history.unshift({
+                level: currentLevel,
+                score: correctCount,
+                total: total,
+                perfect: isPerfect,
+                time: timeStr
+            });
+
+            saveState();
+            updateDashboardUI();
+
+            // Hiển thị màn hình Tổng kết
+            document.getElementById('quizSection').classList.add('hidden');
+            const sumSec = document.getElementById('summarySection');
+            sumSec.classList.remove('hidden');
+
+            const percent = Math.round((correctCount / total) * 100);
+            document.getElementById('sumScore').textContent = `${correctCount} / ${total}`;
+            document.getElementById('sumPercent').textContent = `${percent}%`;
+            document.getElementById('sumMastery').textContent = `${appState.level1PerfectRuns} / 3 lần`;
+
+            const unlocked = isHigherLevelsUnlocked();
+            const remain = Math.max(0, 3 - appState.level1PerfectRuns);
+            const sumStatus = document.getElementById('sumUnlockStatus');
+            const btnNextLvl = document.getElementById('btnGoNextLevel');
+
+            if (unlocked) {
+                sumStatus.textContent = "🔓 Đã mở Cấp 2 & 3";
+                sumStatus.className = "text-sm font-extrabold text-emerald-600 mt-1.5";
+            } else {
+                sumStatus.textContent = `Cần thêm ${remain} lần 12/12`;
+                sumStatus.className = "text-sm font-extrabold text-rose-600 mt-1.5";
+            }
+
+            const studentDisplay = appState.studentName ? ` của em <b>${appState.studentName}</b>` : "";
+
+            if (currentLevel === 1) {
+                if (isPerfect) {
+                    if (appState.level1PerfectRuns >= 3) {
+                        document.getElementById('summaryEmoji').textContent = "🎉🏆🎉";
+                        document.getElementById('summaryTitle').textContent = "CHÚC MỪNG! ĐÃ MỞ KHÓA CẤP ĐỘ 2 & CẤP ĐỘ 3!";
+                        document.getElementById('summarySubtitle').innerHTML = 
+                            `Tuyệt vời! Kết quả${studentDisplay} đã đạt tuyệt đối <b>12/12 câu Cấp độ 1 đủ ${appState.level1PerfectRuns} lần</b>. Em đã thuộc nằm lòng công thức Định luật Hooke và sẵn sàng chinh phục mức 7-8 điểm và 9-10 điểm!`;
+                        btnNextLvl.classList.remove('hidden');
+                    } else {
+                        document.getElementById('summaryEmoji').textContent = "⭐👏";
+                        document.getElementById('summaryTitle').textContent = `Xuất sắc! Đạt tuyệt đối 12/12 (Lần ${appState.level1PerfectRuns}/3)`;
+                        document.getElementById('summarySubtitle').innerHTML = 
+                            `Em đã vượt qua 12 câu Cấp độ 1 không sai câu nào! Hãy bấm <b>"Làm lại cấp độ này"</b> thêm <b>${remain} lần đạt 12/12 nữa</b> (với bộ câu hỏi & đáp án đảo vị trí mới) để mở khóa Cấp độ 2 & 3 nhé!`;
+                        btnNextLvl.classList.add('hidden');
+                    }
+                } else {
+                    document.getElementById('summaryEmoji').textContent = "💪📚";
+                    document.getElementById('summaryTitle').textContent = `Hoàn thành Cấp độ 1: Đúng ${correctCount}/12 câu`;
+                    document.getElementById('summarySubtitle').innerHTML = 
+                        `Để được tính 1 lần tích lũy mở khóa, em cần đạt <b>tuyệt đối 12/12 câu</b> ở Cấp độ 1. Đừng nản lòng, hãy ôn lại các câu vừa sai rồi bấm làm lại ngay nhé!`;
+                    btnNextLvl.classList.add('hidden');
+                }
+            } else {
+                // Cấp độ 2 hoặc 3
+                document.getElementById('summaryEmoji').textContent = isPerfect ? "🏅🚀" : "👍📘";
+                document.getElementById('summaryTitle').textContent = `Hoàn thành Cấp độ ${currentLevel}: Đạt ${correctCount}/${total} câu`;
+                document.getElementById('summarySubtitle').innerHTML = isPerfect
+                    ? `Quá đỉnh! Em đã giải đúng 100% các bài toán nâng cao ở Cấp độ ${currentLevel}!`
+                    : `Em đã hoàn thành lượt luyện tập Cấp độ ${currentLevel}. Hãy bấm làm lại với đề đảo ngẫu nhiên để đạt điểm tuyệt đối nhé!`;
+                if (currentLevel === 2 && unlocked) {
+                    btnNextLvl.classList.remove('hidden');
+                } else {
+                    btnNextLvl.classList.add('hidden');
+                }
+            }
+        }
+
+        function goToNextUnlockedLevel() {
+            if (currentLevel === 1 && isHigherLevelsUnlocked()) {
+                selectLevel(2);
+            } else if (currentLevel === 2 && isHigherLevelsUnlocked()) {
+                selectLevel(3);
+            }
+        }
+
+        // Khởi chạy ứng dụng khi tải trang
+        window.onload = function () {
+            loadState();
+            startLevelQuiz(1);
+        };
+    </script>
+</body>
+</html>
